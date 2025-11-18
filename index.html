@@ -310,6 +310,25 @@
             padding-bottom: 5px;
             margin-bottom: 10px;
         }
+        
+        /* Custom Alert Styling */
+        #custom-alert {
+            position: fixed; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb;
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000; 
+            font-weight: bold; 
+            text-align: center;
+            display: none; /* Initially hidden */
+            transition: opacity 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -324,7 +343,7 @@
         <label>Table Caption (for SEO): <input type="text" id="tableCaption" placeholder="e.g., Q4 Sales Report Data"></label>
     </div>
 
-    <!-- NEW RICH TEXT CONTROLS -->
+    <!-- RICH TEXT CONTROLS -->
     <div class="control-group" id="rich-text-controls">
         <h3>2. Rich Text Formatting</h3>
         <p class="text-sm text-gray-600 mb-4">Click inside a cell to activate it. Formatting applies to selected text, or the entire cell if nothing is selected.</p>
@@ -332,10 +351,11 @@
             <button onclick="applyFormatting('b')" class="btn btn-secondary" title="Bold Text"><b>B</b></button>
             <button onclick="applyFormatting('i')" class="btn btn-secondary" title="Italic Text"><i>I</i></button>
             <button onclick="applyLinkPrompt()" class="btn btn-secondary" title="Insert Hyperlink">L (Link)</button>
+            <button onclick="resetFormatting()" class="btn btn-danger" title="Remove all formatting">Reset</button>
             <span id="active-cell-info" class="text-sm text-gray-500 self-center ml-4">No cell selected.</span>
         </div>
     </div>
-    <!-- END NEW RICH TEXT CONTROLS -->
+    <!-- END RICH TEXT CONTROLS -->
     
     <div id="tableContainer"></div>
     
@@ -402,6 +422,38 @@
     <script>
         // Global variable to track the currently active cell for rich text formatting
         let activeCell = null; 
+
+        // --- Custom Alert Implementation (replaces window.alert) ---
+        /**
+         * Creates or updates a custom, non-blocking modal box for alerts.
+         * This is required to avoid conflicts with iframe/sandbox environments.
+         */
+        function alert(message) {
+            let box = document.getElementById('custom-alert');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'custom-alert';
+                // Styles are defined in CSS for better separation
+                document.body.appendChild(box);
+            }
+            box.textContent = message;
+            box.style.opacity = 0; // Start invisible for transition
+            box.style.display = 'block';
+
+            // Fade in
+            setTimeout(() => {
+                box.style.opacity = 1;
+            }, 10);
+            
+            // Fade out and hide
+            setTimeout(() => {
+                box.style.opacity = 0;
+                setTimeout(() => {
+                    box.style.display = 'none';
+                }, 300); // Wait for fade-out to complete
+            }, 3000);
+        }
+        window.alert = alert; // Ensure all internal calls use the custom function
 
         // --- Core Table Functions and Helpers ---
         
@@ -662,9 +714,22 @@
                 const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
                 wrapSelection('a', normalizedUrl);
             } else if (url !== null) {
-                 // The user clicked OK but left it empty
                  alert("URL cannot be empty. Hyperlink not applied.");
             }
+        };
+
+        /**
+         * Removes all HTML tags from the active cell, resetting it to plain text.
+         */
+        window.resetFormatting = () => {
+            if (!activeCell) {
+                alert("Please click inside a table cell first to select it.");
+                return;
+            }
+            // Using textContent retrieves the plain text content, stripping all HTML tags.
+            const plainText = activeCell.textContent;
+            // Setting innerHTML to plainText removes all formatting wrappers.
+            activeCell.innerHTML = plainText;
         };
 
         /**
@@ -1086,33 +1151,10 @@ ${tableHtml}`;
             }, 2000);
         }
         
-        // Custom alert function to replace window.alert
-        function alert(message) {
-            const container = document.getElementById('tableContainer');
-            let box = document.getElementById('custom-alert');
-            if (!box) {
-                box = document.createElement('div');
-                box.id = 'custom-alert';
-                box.style.cssText = `
-                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-                    background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
-                    padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                    z-index: 1000; font-weight: bold; text-align: center;
-                `;
-                document.body.appendChild(box);
-            }
-            box.textContent = message;
-            box.style.display = 'block';
-
-            setTimeout(() => {
-                box.style.display = 'none';
-            }, 3000);
-        }
-        
-        // Initial table creation on load
-        window.onload = function() {
+        // Initial table creation on load using the most reliable method: DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
             createTable();
-        };
+        });
 
     </script>
 </body>
