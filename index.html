@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SEO-Friendly Table Editor with Rich Text Controls</title>
+    <style>
+        /* --- Default Colors --- */
+        :root {
+            --default-bg-color: #f7f9fc;
+            --header-default-bg: #FAF6FE; 
+            --header-default-text: #360C5F; 
+            --default-text-color: #111927; 
+            --default-border-color: #E7D7FD; 
+            --primary-color: #6c47ff; 
+            --danger-color: #dc3545; 
+            --control-bg: #f5f5f5;
+        }
+
+        /* Modernized General Styling */
+        body {
+            font-family: sans-serif; 
+            margin: 30px;
+            background-color: var(--default-bg-color);
+            color: var(--default-text-color);
+            line-height: 1.6;
+        }
+
+        h2, h3 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--default-border-color);
+            padding-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        /* Modernized Form Controls */
+        label {
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            font-weight: 500;
+        }
+
+        input[type="number"], input[type="text"], select {
+            padding: 10px;
+            border: 1px solid var(--default-border-color);
+            border-radius: 5px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            margin: 5px;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(108, 71, 255, 0.25);
+        }
+        
+        input[type="color"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            padding: 0;
+            cursor: pointer;
+            vertical-align: middle;
+            margin: 5px 10px 5px 0;
+        }
+
+        /* Modernized Buttons */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            font-weight: bold;
+            margin: 10px 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-primary:hover { background-color: #5535c7; }
+        .btn-info { background-color: #5d9ee3; }
+        .btn-info:hover { background-color: #4a7aa9; }
+        .btn-success { background-color: #4cd37e; }
+        .btn-success:hover { background-color: #3aa666; }
+        .btn-danger { background-color: var(--danger-color); } 
+        .btn-danger:hover { background-color: #c82333; } 
+
+
+        /* Modernized Table Styling */
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+            width: 100%;
+            table-layout: fixed;
+            word-wrap: break-word;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+            color: var(--default-text-color); 
+            border: 1px solid var(--default-border-color); 
+        }
+        
+        caption {
+            caption-side: top;
+            padding: 10px;
+            font-weight: bold;
+            text-align: left;
+            color: var(--primary-color);
+        }
+
+        /* Ensure table corners are rounded with border */
+        table thead tr:first-child td:first-child { border-top-left-radius: 8px; }
+        table thead tr:first-child td:last-child { border-top-right-radius: 8px; }
+
+        th, td {
+            border: none;
+            border-right: 1px solid var(--default-border-color);
+            padding: 12px 15px;
+            text-align: left; 
+            white-space: normal;
+        }
+        
+        /* Remove border on the last data column */
+        tbody tr td:last-child, thead tr:nth-child(2) th:last-child {
+            border-right: none;
+        }
+        
+        /* --- VISUAL CONTROL STYLES --- */
+        
+        /* Control Row (above headers) */
+        .table-control-row td {
+            padding: 2px 5px;
+            border: none !important;
+            text-align: center;
+            background-color: var(--control-bg);
+            height: auto;
+        }
+        .table-control-row td:first-child {
+            border-right: 1px solid var(--default-border-color) !important;
+        }
+
+        /* Control Column (first cell in data rows) */
+        .row-control-cell {
+            text-align: center !important;
+            vertical-align: middle;
+            width: 120px; 
+            background-color: var(--control-bg);
+            border-right: 1px solid var(--default-border-color) !important;
+        }
+        
+        /* Control Column Header */
+        thead tr:nth-child(2) th:first-child {
+            width: 120px; 
+            text-align: center;
+            background-color: var(--header-default-bg);
+            color: var(--header-default-text);
+            font-weight: 600;
+        }
+
+        /* Control Buttons */
+        .btn-ctrl {
+            border: 1px solid;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            margin: 0 1px;
+            padding: 3px 5px;
+            line-height: 1;
+            font-size: 10px;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .btn-add {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .btn-add:hover { background-color: #c8e0cf; }
+
+        .btn-del {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        .btn-del:hover { background-color: #f0c9ce; }
+
+        .align-btn {
+            padding: 3px 6px !important; 
+            margin-left: 5px !important; 
+            font-weight: normal !important;
+            font-size: 10px !important;
+        }
+        
+        /* Grouping for column controls */
+        .col-control-group {
+             display: flex;
+             justify-content: center;
+             margin-bottom: 3px;
+        }
+        .col-align-group {
+             margin-top: 3px; 
+             border-top: 1px dashed #ccc; 
+             padding-top: 3px;
+        }
+
+        /* --- END VISUAL CONTROL STYLES --- */
+        
+        thead th {
+            background-color: var(--header-default-bg);
+            color: var(--header-default-text);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid var(--default-border-color); 
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--default-border-color);
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:last-child {
+             border-bottom: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tbody tr:hover {
+            background-color: #f3effe !important; 
+        }
+
+        th[contenteditable="true"], td[contenteditable="true"] {
+            cursor: text;
+            min-height: 20px;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        
+        th[contenteditable="true"]:focus, td[contenteditable="true"]:focus {
+            box-shadow: 0 0 0 2px rgba(108, 71, 255, 0.5); /* Highlight active cell */
+        }
+        
+        /* Exported output section */
+        #output-container {
+            margin-top: 20px;
+            position: relative;
+        }
+
+        #output {
+            background: #e9ecef;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            overflow-x: auto;
+            max-height: 300px;
+            min-height: 100px;
+            margin-top: 10px;
+        }
+
+        /* Control grouping */
+        .control-group {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        /* New section for table setup */
+        #table-setup-group {
+            background: #e6f0ff; 
+            border: 1px solid #b3d1ff;
+            padding: 20px;
+        }
+        
+        .action-bar {
+            display: flex;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        /* Alignment Control containers */
+        .alignment-controls, .color-controls { 
+            padding: 15px;
+            border: 1px solid #f0f0f0;
+            border-radius: 5px;
+            margin-top: 15px;
+            background: #fafafa;
+        }
+        
+        .alignment-controls h5, .color-controls h4 { 
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 1px dashed #e7e7e7;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Dynamic Table Builder & Exporter</h2>
+    
+    <div class="control-group" id="table-setup-group">
+        <h3>1. Table Details</h3>
+        <label>Rows (excluding header): <input type="number" id="rows" min="1" value="3"></label>
+        <label>Columns: <input type="number" id="cols" min="1" value="3"></label>
+        <button onclick="createTable()" class="btn btn-primary">Update/Set Dimensions</button>
+        <br>
+        <label>Table Caption (for SEO): <input type="text" id="tableCaption" placeholder="e.g., Q4 Sales Report Data"></label>
+    </div>
+
+    <!-- NEW RICH TEXT CONTROLS -->
+    <div class="control-group" id="rich-text-controls">
+        <h3>2. Rich Text Formatting</h3>
+        <p class="text-sm text-gray-600 mb-4">Click inside a cell to activate it. Formatting applies to selected text, or the entire cell if nothing is selected.</p>
+        <div class="action-bar">
+            <button onclick="applyFormatting('b')" class="btn btn-secondary" title="Bold Text"><b>B</b></button>
+            <button onclick="applyFormatting('i')" class="btn btn-secondary" title="Italic Text"><i>I</i></button>
+            <button onclick="applyLinkPrompt()" class="btn btn-secondary" title="Insert Hyperlink">L (Link)</button>
+            <span id="active-cell-info" class="text-sm text-gray-500 self-center ml-4">No cell selected.</span>
+        </div>
+    </div>
+    <!-- END NEW RICH TEXT CONTROLS -->
+    
+    <div id="tableContainer"></div>
+    
+    <div class="control-group">
+        <h3>3. Color & Header Alignment Controls (Index-Based)</h3>
+        
+        <div class="color-controls">
+            <h4>Color Control (Header, Row, or Column)</h4>
+            
+            <label>Target:
+                <select id="targetType" onchange="updateTargetIndexOptions()">
+                    <option value="header">Header Cell</option>
+                    <option value="row">Row</option>
+                    <option value="col">Column</option>
+                </select>
+            </label>
+            <label>Index: 
+                <select id="targetIndexSelect" onchange="updateColorInputs()">
+                    </select>
+            </label>
+            
+            <br>
+            
+            <label>Background: <input type="color" id="targetBg" value="#FAF6FE"></label>
+            <label>Text Color: <input type="color" id="targetText" value="#360C5F"></label>
+            <label>Or HEX/RGBA: <input type="text" id="targetCustom" placeholder="Custom color"></label>
+            <button onclick="applyColor()" class="btn btn-success">Apply Color</button>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px dashed #ced4da; margin: 20px 0;">
+
+        <div class="alignment-controls">
+            <h5>Header Alignment Control</h5>
+            <label>Header Index: 
+                <select id="headerIndexAlignSelect">
+                    </select>
+            </label>
+            <label>Header Align:
+                <select id="headerAlign">
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                    <option value="right">Right</option>
+                </select>
+            </label>
+            <button onclick="applyHeaderAlignment()" class="btn btn-info">Apply Header Align</button>
+        </div>
+        
+    </div>
+
+    <div class="control-group">
+        <h3>4. Export</h3>
+        
+        <div class="action-bar">
+            <button onclick="exportHTML()" class="btn btn-info">Generate HTML</button>
+            <button onclick="copyHTML()" class="btn btn-primary" id="copyButton">Copy Code</button>
+        </div>
+
+        <h4>Exported HTML/CSS Code:</h4>
+        <div id="output-container">
+            <pre id="output">Click "Generate HTML" to see the code here.</pre>
+        </div>
+    </div>
+    
+    <script>
+        // Global variable to track the currently active cell for rich text formatting
+        let activeCell = null; 
+
+        // --- Core Table Functions and Helpers ---
+        
+        function getTable() {
+            return document.querySelector('#tableContainer table');
+        }
+        
+        function getBody() {
+            return document.querySelector('#tableContainer tbody');
+        }
+        
+        function getHeaderRow() {
+             // Returns the TR containing the actual TH elements (skipping the control row)
+             return document.querySelector('#tableContainer thead tr:nth-child(2)');
+        }
+
+        // Helper to get the total number of data columns (excluding the control column)
+        function getDataColsCount() {
+            const headerRow = getHeaderRow();
+            // Subtract 1 because the first cell is the control header
+            return headerRow ? headerRow.cells.length - 1 : 0;
+        }
+
+        // Helper to get the total number of data rows
+        function getDataRowsCount() {
+            const body = getBody();
+            return body ? body.rows.length : 0;
+        }
+
+
+        // Function to extract all current content and inline styles, while SKIPPING control cells
+        function captureTableData(table) {
+            if (!table) return null;
+
+            const data = {
+                header: [],
+                body: []
+            };
+
+            // Capture Header Data (THs in the second TR, skipping the first control TH)
+            const headerCells = table.querySelectorAll('thead tr:nth-child(2) th');
+            headerCells.forEach((th, index) => {
+                if (index === 0) return; // Skip the control TH at index 0
+                data.header.push({
+                    html: th.innerHTML, // NOW CAPTURES HTML
+                    style: th.style.cssText
+                });
+            });
+
+            // Capture Body Data (TDs in each TR, skipping the first control TD)
+            const bodyRows = table.querySelectorAll('tbody tr');
+            bodyRows.forEach(tr => {
+                const rowData = {
+                    cells: [],
+                    style: tr.style.cssText 
+                };
+                tr.querySelectorAll('td').forEach((td, index) => {
+                    if (index === 0) return; // Skip the control TD at index 0
+                    rowData.cells.push({
+                        html: td.innerHTML, // NOW CAPTURES HTML
+                        style: td.style.cssText 
+                    });
+                });
+                data.body.push(rowData);
+            });
+
+            return data;
+        }
+
+        // --- Utility Functions (Color/Alignment Updates) ---
+        
+        /**
+         * Updates all select options for Color and Header Alignment controls based on current table dimensions.
+         */
+        function updateControlOptions() {
+             updateTargetIndexOptions();
+             updateHeaderAlignOptions();
+        }
+
+        function updateTargetIndexOptions() {
+            const targetType = document.getElementById('targetType').value;
+            const select = document.getElementById('targetIndexSelect');
+            select.innerHTML = '';
+            const dataCols = getDataColsCount();
+            const dataRows = getDataRowsCount();
+            
+            // Determine max index based on selection
+            let count = 0;
+            if (targetType === 'header') {
+                count = dataCols;
+            } else if (targetType === 'row') {
+                count = dataRows;
+            } else if (targetType === 'col') {
+                count = dataCols;
+            }
+            
+            for (let i = 1; i <= count; i++) {
+                select.options.add(new Option(i, i));
+            }
+        };
+
+
+        function updateHeaderAlignOptions() {
+             const select = document.getElementById('headerIndexAlignSelect');
+             select.innerHTML = '';
+            for (let i = 1; i <= getDataColsCount(); i++) {
+                select.options.add(new Option(i, i));
+            }
+        };
+
+        window.updateTargetIndexOptions = updateTargetIndexOptions;
+        window.updateHeaderAlignOptions = updateHeaderAlignOptions;
+
+        window.updateColorInputs = () => { /* No-op for now */ };
+        
+        window.applyColor = () => {
+             const table = getTable();
+             if (!table) return;
+             const targetType = document.getElementById('targetType').value;
+             const targetIndex = parseInt(document.getElementById('targetIndexSelect').value) || 1;
+             const bg = document.getElementById('targetBg').value;
+             const text = document.getElementById('targetText').value;
+             const custom = document.getElementById('targetCustom').value.trim();
+             const colorToUse = custom || bg;
+
+             try {
+                if (targetType === 'header') {
+                    // +1 to skip the control TH
+                    const th = document.querySelector('thead tr:nth-child(2) th:nth-child(' + (targetIndex + 1) + ')');
+                    if (th) {
+                        th.style.backgroundColor = colorToUse;
+                        th.style.color = text;
+                    }
+                } else if (targetType === 'row') {
+                    const row = document.querySelector('tbody tr:nth-child(' + targetIndex + ')');
+                    if (row) {
+                        row.style.backgroundColor = colorToUse;
+                        row.style.color = text;
+                    }
+                } else if (targetType === 'col') {
+                    // Apply to all cells in the column, starting from the header
+                    // +1 to skip the control cell (TH or TD)
+                    const header = document.querySelector('thead tr:nth-child(2) th:nth-child(' + (targetIndex + 1) + ')');
+                    if (header) {
+                        header.style.backgroundColor = colorToUse;
+                        header.style.color = text;
+                    }
+                    document.querySelectorAll('tbody tr').forEach(row => {
+                        const cell = row.querySelector('td:nth-child(' + (targetIndex + 1) + ')');
+                        if (cell) {
+                            cell.style.backgroundColor = colorToUse;
+                            cell.style.color = text;
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error applying color:", e);
+            }
+        };
+        
+        window.applyHeaderAlignment = () => {
+             const index = parseInt(document.getElementById('headerIndexAlignSelect').value) || 1;
+             const align = document.getElementById('headerAlign').value;
+             // +1 to skip the control TH
+             const th = document.querySelector('thead tr:nth-child(2) th:nth-child(' + (index + 1) + ')');
+             if (th) th.style.textAlign = align;
+        };
+        
+        // --- VISUAL ALIGNMENT FUNCTIONS ---
+        
+        function visualSetRowAlignment(rowIndex, alignment) {
+            // +1 because it's a 0-based index but nth-child is 1-based
+            const row = document.querySelector('tbody tr:nth-child(' + (rowIndex + 1) + ')'); 
+            if (row) {
+                // Select all TDs starting from the second one (index 1 is the first data cell)
+                row.querySelectorAll('td').forEach((td, i) => {
+                    if (i > 0) td.style.textAlign = alignment;
+                });
+            }
+        }
+        
+        function visualSetColumnAlignment(colIndex, alignment) {
+            // colIndex is 0-based data index. DOM index is colIndex + 1 (since index 0 is control cell)
+            const domIndex = colIndex + 1; 
+
+            // 1. Apply to Header Cell (TH)
+            // +1 because it's the second row of thead, and we skip the control TH
+            const header = document.querySelector('thead tr:nth-child(2) th:nth-child(' + (domIndex + 1) + ')');
+            if (header) header.style.textAlign = alignment;
+
+            // 2. Apply to Body Cells (TD)
+            document.querySelectorAll('tbody tr').forEach(row => {
+                // +1 because we skip the control TD
+                const cell = row.querySelector('td:nth-child(' + (domIndex + 1) + ')');
+                if (cell) cell.style.textAlign = alignment;
+            });
+        }
+        
+        window.visualSetRowAlignment = visualSetRowAlignment;
+        window.visualSetColumnAlignment = visualSetColumnAlignment;
+        
+        // --- RICH TEXT FORMATTING FUNCTIONS ---
+        
+        /**
+         * Helper to wrap text with tags (<b>, <i>, <a>).
+         * Prioritizes wrapping selected text. If no text is selected, wraps all content.
+         * @param {string} tag The HTML tag name (e.g., 'b', 'i', 'a').
+         * @param {string} attrValue Optional attribute value for links (href).
+         */
+        function wrapSelection(tag, attrValue = null) {
+            if (!activeCell) {
+                alert("Please click inside a table cell first to select it.");
+                return;
+            }
+
+            const selection = window.getSelection();
+            
+            // Check if selection exists AND is within the active cell
+            if (selection.rangeCount > 0 && activeCell.contains(selection.getRangeAt(0).startContainer)) {
+                // Case 1: Text is selected within the cell
+                const range = selection.getRangeAt(0);
+                const selectedText = range.extractContents(); // Remove selected text
+                
+                const wrapper = document.createElement(tag);
+                if (tag === 'a' && attrValue) {
+                    wrapper.href = attrValue;
+                    wrapper.target = '_blank'; // Good practice for external links
+                }
+                wrapper.appendChild(selectedText);
+                range.insertNode(wrapper); // Insert the wrapped element back
+            } else {
+                // Case 2: No text selected, wrap the entire cell content
+                const originalHtml = activeCell.innerHTML.trim();
+                let wrappedHtml;
+
+                if (tag === 'a' && attrValue) {
+                    wrappedHtml = `<a href="${attrValue}" target="_blank">${originalHtml}</a>`;
+                } else if (tag === 'b') {
+                    wrappedHtml = `<b>${originalHtml}</b>`;
+                } else if (tag === 'i') {
+                    wrappedHtml = `<i>${originalHtml}</i>`;
+                }
+
+                if (wrappedHtml) {
+                    activeCell.innerHTML = wrappedHtml;
+                }
+            }
+        }
+        
+        window.applyFormatting = (tag) => {
+            wrapSelection(tag);
+        };
+        
+        window.applyLinkPrompt = () => {
+            const url = prompt("Enter the URL for the hyperlink (e.g., https://google.com):");
+            if (url && url.trim() !== '') {
+                // Simple validation to ensure it looks like a URL
+                const normalizedUrl = url.startsWith('http') ? url : `https://${url}`;
+                wrapSelection('a', normalizedUrl);
+            } else if (url !== null) {
+                 // The user clicked OK but left it empty
+                 alert("URL cannot be empty. Hyperlink not applied.");
+            }
+        };
+
+        /**
+         * Sets the global activeCell when an editable cell is clicked/focused.
+         * Also updates the info text.
+         */
+        function setActiveCell(cell) {
+            activeCell = cell;
+            document.getElementById('active-cell-info').textContent = 'Cell selected. Ready for formatting.';
+        }
+
+        // --- Table Modification Functions (Row/Column Add/Delete) ---
+
+        // Function to create/update table with data persistence
+        function createTable() {
+            const newRows = parseInt(document.getElementById('rows').value) || 1;
+            const newCols = parseInt(document.getElementById('cols').value) || 1;
+            const container = document.getElementById('tableContainer');
+            const existingTable = getTable();
+            
+            // 1. Capture existing data if table exists
+            const existingData = captureTableData(existingTable);
+
+            // 2. Clear container
+            container.innerHTML = ''; 
+            activeCell = null; // Clear active cell on table rebuild
+            document.getElementById('active-cell-info').textContent = 'No cell selected.';
+            
+            const table = document.createElement('table');
+            
+            // --- Add Caption ---
+            const captionText = document.getElementById('tableCaption').value.trim();
+            if (captionText) {
+                const caption = document.createElement('caption');
+                caption.textContent = captionText;
+                table.appendChild(caption);
+            }
+
+            // --- Rebuild Header (Thead includes 2 rows: Controls and Data) ---
+            const thead = document.createElement('thead');
+            
+            // 2a. Column Insertion/Deletion Controls Row
+            const trColControls = document.createElement('tr');
+            trColControls.classList.add('table-control-row');
+            // Corner cell (empty)
+            trColControls.appendChild(document.createElement('td')); 
+            thead.appendChild(trColControls); 
+
+            // 2b. Main Header Row (Data)
+            const trHead = document.createElement('tr');
+            
+            // Control Column Header
+            const thCtrl = document.createElement('th');
+            thCtrl.innerText = 'Ctrl';
+            thCtrl.style.textAlign = 'center';
+            trHead.appendChild(thCtrl); 
+
+            for (let j = 0; j < newCols; j++) {
+                const th = document.createElement('th');
+                th.contentEditable = true;
+                th.setAttribute('scope', 'col'); // SEO friendly
+                th.onfocus = () => setActiveCell(th); // Set active cell
+
+                if (existingData && existingData.header[j]) {
+                    th.innerHTML = existingData.header[j].html; // Use innerHTML
+                    th.style.cssText = existingData.header[j].style;
+                } else {
+                    th.innerHTML = `Header ${j+1}`;
+                }
+                trHead.appendChild(th);
+            }
+            thead.appendChild(trHead);
+            table.appendChild(thead);
+            
+            // --- Rebuild Body ---
+            const tbody = document.createElement('tbody');
+            for (let i = 0; i < newRows; i++) {
+                const tr = document.createElement('tr');
+                
+                if (existingData && existingData.body[i]) {
+                    tr.style.cssText = existingData.body[i].style; // Restore row style
+                }
+                
+                // Row Control Cell
+                const tdCtrl = document.createElement('td');
+                tdCtrl.classList.add('row-control-cell');
+                tr.appendChild(tdCtrl); 
+
+                for (let j = 0; j < newCols; j++) {
+                    const td = document.createElement('td');
+                    td.contentEditable = true;
+                    td.onfocus = () => setActiveCell(td); // Set active cell
+                    
+                    if (existingData && existingData.body[i] && existingData.body[i].cells[j]) {
+                        // Restore cell text and style
+                        td.innerHTML = existingData.body[i].cells[j].html; // Use innerHTML
+                        td.style.cssText = existingData.body[i].cells[j].style;
+                    } else {
+                        // Use default/new text
+                        td.innerHTML = `Row ${i+1}, Col ${j+1}`;
+                    }
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            }
+            table.appendChild(tbody);
+            
+            container.appendChild(table);
+
+            document.getElementById('output').textContent = `Table updated to ${newRows} rows and ${newCols} columns.`;
+            
+            // 3. Update all controls
+            updateVisualControls();
+        }
+        
+        // --- VISUAL CONTROL FUNCTIONS (Core Logic) ---
+
+        function visualAddRow(rowIndex, position) {
+            const body = getBody();
+            const cols = getDataColsCount();
+            const totalRows = getDataRowsCount();
+            
+            // Determine the insertion index (0-based DOM index)
+            const insertionIndex = (position === 'before') ? rowIndex : rowIndex + 1;
+            
+            if (insertionIndex < 0 || insertionIndex > totalRows) {
+                 console.error("Invalid row index for insertion.");
+                 return;
+            }
+
+            const newRow = body.insertRow(insertionIndex);
+            
+            // Add Control Cell (index 0)
+            const newCtrlCell = newRow.insertCell(0);
+            newCtrlCell.classList.add('row-control-cell');
+
+            // Add Data Cells (starting at index 1)
+            for (let j = 0; j < cols; j++) {
+                const newCell = newRow.insertCell(j + 1);
+                newCell.contentEditable = true;
+                newCell.innerHTML = `New Row, Col ${j + 1}`;
+                newCell.onfocus = () => setActiveCell(newCell);
+            }
+            
+            document.getElementById('rows').value = totalRows + 1;
+            updateVisualControls(); // Re-index all visual buttons
+        }
+
+        function visualDeleteRow(rowIndex) {
+            const body = getBody();
+            const totalRows = getDataRowsCount();
+            if (totalRows === 1) {
+                alert("Cannot delete the last row. Table must have at least one data row."); 
+                return;
+            }
+            
+            if (rowIndex < 0 || rowIndex >= totalRows) {
+                 console.error("Invalid row index for deletion.");
+                 return;
+            }
+            
+            body.deleteRow(rowIndex);
+            
+            document.getElementById('rows').value = totalRows - 1;
+            updateVisualControls(); // Re-index all visual buttons
+        }
+
+        function visualAddColumn(colIndex, position) {
+            const headerRow = getHeaderRow();
+            const bodyRows = document.querySelectorAll('#tableContainer tbody tr');
+            const totalCols = getDataColsCount();
+            
+            // Determine the insertion index (0-based DOM index including control column)
+            // colIndex is the 0-based index of the data column
+            // We must add 1 because the first cell is the control column
+            const insertionIndex = (position === 'before') ? colIndex + 1 : colIndex + 2;
+
+            if (insertionIndex < 1 || insertionIndex > totalCols + 1) {
+                console.error("Invalid column index for insertion.");
+                return;
+            }
+
+            // 1. Insert into Header Row (Data Header)
+            const newHeaderCell = document.createElement('th');
+            newHeaderCell.contentEditable = true;
+            newHeaderCell.innerHTML = 'New Header';
+            newHeaderCell.setAttribute('scope', 'col');
+            newHeaderCell.onfocus = () => setActiveCell(newHeaderCell);
+            headerRow.insertBefore(newHeaderCell, headerRow.cells[insertionIndex]);
+
+            // 2. Insert into Body Rows (Data Cells)
+            bodyRows.forEach((row, i) => {
+                const newCell = row.insertCell(insertionIndex);
+                newCell.contentEditable = true;
+                newCell.innerHTML = `Row ${i + 1}, New Col`;
+                newCell.onfocus = () => setActiveCell(newCell);
+            });
+            
+            document.getElementById('cols').value = totalCols + 1;
+            updateVisualControls(); // Re-index all visual buttons
+        }
+
+        function visualDeleteColumn(colIndex) {
+            const headerRow = getHeaderRow();
+            const bodyRows = document.querySelectorAll('#tableContainer tbody tr');
+            const totalCols = getDataColsCount();
+            
+            if (totalCols === 1) {
+                alert("Cannot delete the last column. Table must have at least one data column."); 
+                return;
+            }
+
+            // The cell index to delete in the DOM (0-based, including control column)
+            // +1 because of the control column at index 0
+            const deleteIndex = colIndex + 1; 
+
+            if (deleteIndex < 1 || deleteIndex > totalCols) {
+                console.error("Invalid column index for deletion.");
+                return;
+            }
+
+            // 1. Delete from Header Row (Data Header)
+            headerRow.deleteCell(deleteIndex);
+
+            // 2. Delete from Body Rows (Data Cells)
+            bodyRows.forEach(row => {
+                row.deleteCell(deleteIndex);
+            });
+            
+            document.getElementById('cols').value = totalCols - 1;
+            updateVisualControls(); // Re-index all visual buttons
+        }
+
+        // --- FUNCTION TO RE-INDEX ALL VISUAL BUTTONS AFTER MODIFICATION ---
+        function updateVisualControls() {
+            const bodyRows = document.querySelectorAll('#tableContainer tbody tr');
+
+            // 1. Re-index Row Controls
+            bodyRows.forEach((row, i) => {
+                const ctrlCell = row.querySelector('.row-control-cell');
+                if (ctrlCell) {
+                    // i is the 0-based DOM index
+                    ctrlCell.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <button class="btn-ctrl btn-add" title="Insert row above" onclick="visualAddRow(${i}, 'before')">+</button>
+                            <button class="btn-ctrl btn-del" title="Delete row" onclick="visualDeleteRow(${i})">-</button>
+                            <button class="btn-ctrl btn-add" title="Insert row below" onclick="visualAddRow(${i}, 'after')">+</button>
+                        </div>
+                        <div style="font-size: 8px; line-height: 1; margin-top: 8px; border-top: 1px dashed #ccc; padding-top: 5px;">ALIGN:</div>
+                        <div>
+                            <button class="btn-ctrl btn-secondary align-btn" title="Align Row Left" onclick="visualSetRowAlignment(${i}, 'left')">L</button>
+                            <button class="btn-ctrl btn-secondary align-btn" title="Align Row Center" onclick="visualSetRowAlignment(${i}, 'center')">C</button>
+                            <button class="btn-ctrl btn-secondary align-btn" title="Align Row Right" onclick="visualSetRowAlignment(${i}, 'right')">R</button>
+                        </div>
+                    `;
+                }
+            });
+            
+            // 2. Re-index Column Controls
+            const colControlRow = document.querySelector('.table-control-row');
+            if (colControlRow) {
+                // Clear old buttons, keeping the first control cell
+                while (colControlRow.cells.length > 1) {
+                    colControlRow.deleteCell(1);
+                }
+                
+                const dataCols = getDataColsCount();
+                for (let j = 0; j < dataCols; j++) {
+                    const td = colControlRow.insertCell(-1); // Insert at the end
+                    // j is the 0-based index of the data column
+                    td.innerHTML = `
+                        <div class="col-control-group">
+                            <button class="btn-ctrl btn-add" title="Insert column before" onclick="visualAddColumn(${j}, 'before')">+</button>
+                            <button class="btn-ctrl btn-del" title="Delete column" onclick="visualDeleteColumn(${j})">-</button>
+                            <button class="btn-ctrl btn-add" title="Insert column after" onclick="visualAddColumn(${j}, 'after')">+</button>
+                        </div>
+                        <div class="col-align-group">
+                            <button class="btn-ctrl btn-info align-btn" title="Align Column Left" onclick="visualSetColumnAlignment(${j}, 'left')">L</button>
+                            <button class="btn-ctrl btn-info align-btn" title="Align Column Center" onclick="visualSetColumnAlignment(${j}, 'center')">C</button>
+                            <button class="btn-ctrl btn-info align-btn" title="Align Column Right" onclick="visualSetColumnAlignment(${j}, 'right')">R</button>
+                        </div>
+                    `;
+                }
+            }
+            
+            // 3. Update the index options for the remaining input fields
+            updateControlOptions();
+        }
+        
+        // --- Export Functions ---
+        
+        /**
+         * Utility function to strip CSS and HTML comments.
+         */
+        function stripComments(str) {
+            // Remove CSS comments (/* ... */) and HTML comments (<!-- ... -->)
+            str = str.replace(/\/\*[\s\S]*?\*\//g, '');
+            str = str.replace(/<!--[\s\S]*?-->/g, '');
+            // Remove excess whitespace and newlines for clean export
+            return str.replace(/^\s*\n/gm, '').trim();
+        }
+
+
+        // Function to sanitize CSS (only core styles for table structure)
+        function getComputedTableStyles() {
+            // No comments in the final output CSS
+            let css = `
+table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    word-wrap: break-word;
+    border: 1px solid #E7D7FD;
+    color: #111927;
+}
+
+caption {
+    caption-side: top;
+    padding: 10px;
+    font-weight: bold;
+    text-align: left;
+    color: #6c47ff;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: inherit; /* Use inherit to respect inline text-align */
+    border-right: 1px solid #E7D7FD;
+    white-space: normal;
+}
+
+th:last-child, td:last-child {
+    border-right: none;
+}
+
+thead th {
+    background-color: #FAF6FE;
+    color: #360C5F;
+    font-weight: 600;
+    border-bottom: 2px solid #E7D7FD;
+}
+
+tbody tr {
+    border-bottom: 1px solid #E7D7FD;
+}
+
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+`;
+            return stripComments(css);
+        }
+
+        function exportHTML() {
+            const table = getTable();
+            if (!table) return console.error("Please create a table first!");
+
+            // Data capture automatically skips control cells
+            const data = captureTableData(table);
+            const captionText = document.getElementById('tableCaption').value.trim();
+            const css = getComputedTableStyles();
+            
+            // Generate Caption HTML
+            let captionHtml = captionText ? `\n\t<caption>${captionText}</caption>` : '';
+
+            // Generate Header HTML (SEO friendly: added scope="col")
+            let headerHtml = '<thead>\n\t<tr>';
+            data.header.forEach(h => {
+                headerHtml += `\n\t\t<th scope="col"${h.style ? ` style="${h.style}"` : ''}>${h.html}</th>`; // Use h.html
+            });
+            headerHtml += '\n\t</tr>\n</thead>';
+
+            // Generate Body HTML
+            let bodyHtml = '<tbody>';
+            data.body.forEach(r => {
+                bodyHtml += `\n\t<tr${r.style ? ` style="${r.style}"` : ''}>`;
+                r.cells.forEach(c => {
+                    bodyHtml += `\n\t\t<td${c.style ? ` style="${c.style}"` : ''}>${c.html}</td>`; // Use c.html
+                });
+                bodyHtml += '\n\t</tr>';
+            });
+            bodyHtml += '\n</tbody>';
+
+            const tableHtml = `<table style="/* Remove default styling if desired */">\n${captionHtml}\n${headerHtml}\n${bodyHtml}\n</table>`;
+
+            const fullOutput = `
+<style>
+${css}
+</style>
+${tableHtml}`;
+
+            // Strip all comments from the final output
+            document.getElementById('output').textContent = stripComments(fullOutput).trim();
+            document.getElementById('output').scrollTop = 0; 
+        }
+
+        function copyHTML() {
+            const outputElement = document.getElementById('output');
+            const textToCopy = outputElement.textContent;
+            
+            // Fallback for iframe environment
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            
+            const button = document.getElementById('copyButton');
+            const originalText = button.innerHTML;
+            button.innerHTML = 'Copied!';
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+            }, 2000);
+        }
+        
+        // Custom alert function to replace window.alert
+        function alert(message) {
+            const container = document.getElementById('tableContainer');
+            let box = document.getElementById('custom-alert');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'custom-alert';
+                box.style.cssText = `
+                    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+                    padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    z-index: 1000; font-weight: bold; text-align: center;
+                `;
+                document.body.appendChild(box);
+            }
+            box.textContent = message;
+            box.style.display = 'block';
+
+            setTimeout(() => {
+                box.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Initial table creation on load
+        window.onload = function() {
+            createTable();
+        };
+
+    </script>
+</body>
+</html>
