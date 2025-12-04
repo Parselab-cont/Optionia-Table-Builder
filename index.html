@@ -329,6 +329,59 @@
             display: none; /* Initially hidden */
             transition: opacity 0.3s;
         }
+
+            /* ------------------------------------------------------ */
+        /* MOBILE RESPONSIVE FIX                                  */
+        /* ------------------------------------------------------ */
+        .responsive-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                min-width: 720px !important; 
+            }
+
+            th, td {
+                padding: 8px 10px !important;
+                font-size: 14px !important;
+                white-space: nowrap !important;       /* Prevent line breaks */
+                overflow: hidden !important;          /* Hide overflow */
+                text-overflow: ellipsis !important;   /* Show ellipsis */
+            }
+
+            .row-control-cell {
+                width: 70px !important;
+                padding: 4px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .table-control-row td {
+                padding: 3px !important;
+                font-size: 10px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .btn-ctrl {
+                font-size: 9px !important;
+                padding: 2px 4px !important;
+            }
+
+            .col-control-group,
+            .col-align-group {
+                flex-direction: column;
+                gap: 2px;
+            }
+        }
+
+
     </style>
 </head>
 <body>
@@ -357,7 +410,9 @@
     </div>
     <!-- END RICH TEXT CONTROLS -->
     
-    <div id="tableContainer"></div>
+    <div class="responsive-table-wrapper">
+        <div id="tableContainer"></div>
+    </div>
     
     <div class="control-group">
         <h3>3. Color & Header Alignment Controls (Index-Based)</h3>
@@ -374,7 +429,7 @@
             </label>
             <label>Index: 
                 <select id="targetIndexSelect" onchange="updateColorInputs()">
-                    </select>
+                </select>
             </label>
             
             <br>
@@ -391,7 +446,7 @@
             <h5>Header Alignment Control</h5>
             <label>Header Index: 
                 <select id="headerIndexAlignSelect">
-                    </select>
+                </select>
             </label>
             <label>Header Align:
                 <select id="headerAlign">
@@ -1117,13 +1172,45 @@ tbody tr:nth-child(even) {
             });
             bodyHtml += '\n</tbody>';
 
-            const tableHtml = `<table style="/* Remove default styling if desired */">\n${captionHtml}\n${headerHtml}\n${bodyHtml}\n</table>`;
+    const tableHtml = `<div class="responsive-table-wrapper">\n<table>\n${captionHtml}\n${headerHtml}\n${bodyHtml}\n</table>\n</div>`;
+    const responsiveCSS = `${css}
 
-            const fullOutput = `
+.responsive-table-wrapper {
+    width: 100%;
+    overflow-x: auto;              /* Enable horizontal scroll */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    table {
+        min-width: 720px !important; 
+    }
+
+    th, td {
+        padding: 8px 10px !important;
+        font-size: 14px !important;
+        white-space: nowrap !important;       /* Prevent line breaks */
+        overflow: hidden !important;          /* Hide overflow */
+        text-overflow: ellipsis !important;   /* Show ellipsis */
+    }
+
+    .row-control-cell,
+    .table-control-row td {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}`;
+
+    const fullOutput = `
 <style>
 ${css}
+${responsiveCSS}
 </style>
 ${tableHtml}`;
+    document.getElementById('output').textContent = fullOutput;
+
 
             // Strip all comments from the final output
             document.getElementById('output').textContent = stripComments(fullOutput).trim();
